@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="#{titulo.pagina}">Resultados de Geometría</title>
+    <style>
+		body {
+		  font-family: var(--tipo-principal);
+		  font-size: 100%;
+		  line-height: 1.4em;
+		  min-height: 100vh;
+		  background-color: #2b3e52;
+		  color: var(--negro);
+		  -webkit-hyphens: auto;
+		          hyphens: auto;
+		  font-smooth: always;
+		  -webkit-font-smoothing: antialiased;
+		  -moz-osx-font-smoothing: grayscale;
+		  display: flex;
+		  flex-flow: row nowrap;
+		  justify-content: center;
+		  align-items: center;
+		}
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background-color: #4CAF50;
+            color: white;
+            font-weight: bold;
+        }
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        tr:hover {
+            background-color: #e9e9e9;
+        }
+        .victoria {
+            color: #2ecc71;
+            font-weight: bold;
+        }
+        .derrota {
+            color: #e74c3c;
+        }
+        .actions {
+            margin-top: 20px;
+            text-align: center;
+        }
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background: #3498db;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            margin: 0 10px;
+            transition: background 0.3s;
+        }
+        .btn:hover {
+            background: #2980b9;
+        }
+        .btn-danger {
+            background: #e74c3c;
+        }
+        .btn-danger:hover {
+            background: #c0392b;
+        }
+        .empty-message {
+            text-align: center;
+            color: #7f8c8d;
+            padding: 20px;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 th:text="#{titulo.resultados}">Resultados de Geometría</h1>
+        
+        <div th:if="${puntuaciones.isEmpty()}">
+            <p class="empty-message" th:text="#{mensaje.sin.resultados}">No hay resultados registrados todavía.</p>
+        </div>
+        
+        <table th:unless="${puntuaciones.isEmpty()}">
+            <thead>
+                <tr>
+                    <th th:text="#{tabla.usuario}">Usuario</th>
+                    <th th:text="#{tabla.tiempo}">Tiempo (segundos)</th>
+                    <th th:text="#{tabla.resultado}">Resultado</th>
+                    <th th:text="#{tabla.fecha}">Fecha</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="puntuacion : ${puntuaciones}">
+                    <td th:text="${puntuacion.username}">Usuario</td>
+                    <td th:text="${puntuacion.tiempo}">0</td>
+                    <td>
+                        <span th:text="${puntuacion.victoria} ? #{resultado.victoria} : #{resultado.derrota}"
+                              th:class="${puntuacion.victoria} ? 'victoria' : 'derrota'">
+                            Resultado
+                        </span>
+                    </td>
+                    <td th:text="${#temporals.format(puntuacion.fecha, 'dd/MM/yyyy HH:mm')}">01/01/2023 12:00</td>
+                </tr>
+            </tbody>
+        </table>
+        
+        <div class="actions">
+            <a th:href="@{/juegos/matematicas/geometria}" class="btn" th:text="#{boton.jugar.nuevamente}">Jugar de nuevo</a>
+            <a th:href="@{/juegos/home-matematicas}" class="btn" th:text="#{boton.volver.inicio}">Volver al inicio</a>
+            <form th:action="@{/juegos/puntuaciones/eliminar-geometria}" method="post" style="display: inline;">
+                <button type="submit" class="btn btn-danger" th:text="#{boton.borrar.resultados}">Eliminar todos los resultados</button>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

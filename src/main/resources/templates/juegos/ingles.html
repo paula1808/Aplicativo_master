@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title th:text="#{titulo.pagina}">Juego de Inglés</title>
+<style>
+    /* Estilos Globales */
+    body {
+      font-family: var(--tipo-principal, Arial, sans-serif);
+      font-size: 100%;
+      line-height: 1.4em;
+      min-height: 100vh;
+      background-color: #2b3e52;
+      color: var(--negro, #000);
+      -webkit-hyphens: auto;
+              hyphens: auto;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin: 0;
+      padding: 20px;
+    }
+    .container {
+      max-width: 1000px;
+      width: 100%;
+      background: white;
+      padding: 20px 40px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    h1, h3 {
+      color: #2c3e50;
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    h3 {
+      font-size: 20px; 
+      margin-bottom: 20px;
+    }
+    .nivel-selector {
+      margin-bottom: 20px;
+      text-align: center;
+    }
+    .nivel-selector label {
+      font-weight: bold;
+      margin-right: 10px;
+    }
+    select {
+      padding: 5px 8px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      margin-right: 10px;
+    }
+    /* Estilo común para botones y elementos interactivos */
+    button, input[type="submit"] {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      background: #3498db;
+      color: white;
+      cursor: pointer;
+      transition: background 0.3s;
+      margin: 5px;
+    }
+    button:hover, input[type="submit"]:hover {
+      background: #2980b9;
+    }
+    .nivel-info {
+      color: #4CAF50;
+      font-weight: bold;
+      text-align: center;
+      margin-top: 10px;
+    }
+    form {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .option-buttons {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    p.resultado {
+      text-align: center;
+      font-size: 20px;
+      margin-top: 20px;
+      font-weight: bold;
+    }
+    .btn-home {
+      background-color: #e74c3c;
+    }
+    .btn-home:hover {
+      background-color: #c0392b;
+    }
+    /* Responsive */
+    @media (max-width: 600px) {
+      .container {
+        padding: 15px 20px;
+      }
+      h1, h3 {
+        font-size: 18px;
+        margin-bottom: 20px;
+      }
+      select {
+        width: 100%;
+        margin-bottom: 10px;
+      }
+      button, input[type="submit"] {
+        width: 100%;
+        margin: 5px 0;
+        padding: 10px;
+      }
+      .option-buttons span {
+        display: block;
+        margin-bottom: 10px;
+      }
+      p.resultado {
+        font-size: 18px;
+      }
+    }
+    @media (min-width: 601px) and (max-width: 900px) {
+      .container {
+        padding: 20px 30px;
+      }
+      select {
+          width: auto;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h3 th:text="#{mensaje.bienvenida}">Bienvenido, <span th:text="${username}"></span></h3>
+    
+    <div class="nivel-selector">    
+        <form th:action="@{/juegos/ingles}" method="get">
+            <label for="nivel" th:text="#{mensaje.seleccionar.nivel}">Selecciona nivel:</label>
+            <select id="nivel" name="nivel">
+                <option th:each="nivel : ${niveles}" 
+                        th:value="${nivel}" 
+                        th:text="${nivel}"
+                        th:selected="${nivel == pregunta.dificultad}">
+                </option>
+            </select>
+            <button type="submit" th:text="#{boton.cambiar}">Cambiar</button>
+        </form>
+        <p class="nivel-info" th:text="#{mensaje.nivel.actual} + ' ' + ${pregunta.dificultad}"></p>
+    </div>
+
+    <h1 th:text="#{mensaje.completar.oracion}">Completa la oración:</h1>
+    <p th:text="${pregunta.oracion}" style="text-align: center; font-size: 18px;"></p>
+    
+    <form th:action="@{/juegos/ingles/verificar}" method="post">
+        <input type="hidden" name="oracion" th:value="${pregunta.oracion}">
+        <input type="hidden" name="nivel" th:value="${pregunta.dificultad}">
+        
+        <div class="option-buttons">
+            <span th:each="opcion : ${pregunta.opciones}">
+                <button type="submit" name="respuesta" th:value="${opcion}" th:text="${opcion}"></button>
+            </span>
+        </div>
+    </form>
+    
+    <p class="resultado" th:if="${resultado}" th:text="${resultado}" 
+       th:style="${resultado == '¡Correcto!' ? 'color:green' : 'color:red'}"></p>
+    
+    <div style="text-align: center; margin-top: 20px;">
+        <button type="button" class="btn-home">
+          <a th:href="@{/home}" style="text-decoration: none; color:#ffffff; display:block;" th:text="#{boton.volver.home}">Volver al Home</a>
+        </button>
+    </div>
+  </div>
+</body>
+</html>

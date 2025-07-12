@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="#{titulo.pagina}">Home</title>
+    <link rel="stylesheet" th:href="@{/css/styles-home.css}">
+    <script defer th:src="@{/js/carrosel-home.js}"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.6.0/js/bootstrap.min.js"></script>
+</head>
+<body>
+
+    <div class="carrousel">
+        <div class="grande">
+            <div class="slide">
+                <a th:href="@{/juegos/ingles}">
+                 <img th:src="@{/img/home/ingles.png}" alt="Imagen 1" class="img">
+                 <span class="titulo-img" th:text="#{titulo.ingles}">Inglés</span>  
+                </a>
+            </div>
+            <div class="slide">
+                <a th:href="@{/juegos/home-matematicas}">
+                 <img th:src="@{/img/home/matematicas.png}" alt="Imagen 2" class="img">
+                 <span class="titulo-img" th:text="#{titulo.matematicas}">Matemáticas</span>   
+                </a>
+            </div>
+            <div class="slide">
+                <a th:href="@{/juegos/geografia}">
+                  <img th:src="@{/img/home/geografia.png}" alt="Imagen 3" class="img">
+                 <span class="titulo-img" th:text="#{titulo.geografia}">Geografía</span>  
+                </a>
+            </div>
+            <div class="slide">
+                <a th:href="@{/info}">
+                 <img th:src="@{/img/home/informacion.png}" alt="Imagen 4" class="img">
+                 <span class="titulo-img" th:text="#{titulo.mas.informacion}">Más información</span>  
+                </a>
+            </div>
+        </div>
+        
+        <ul class="puntos">
+            <li class="punto activo"></li>
+            <li class="punto"></li>
+            <li class="punto"></li>
+        </ul>
+        <div class="info-boton">
+            <a th:href="@{/logout}" class="btn" style="background-color: #e74c3c" th:text="#{boton.cerrar.sesion}">Cerrar Sesión</a>
+            <a th:href="@{/puntuaciones/ingles}" class="btn" th:text="#{boton.ver.puntuaciones.ingles}">Ver mis puntuaciones de inglés</a>
+            <a th:href="@{/juegos/puntuaciones/geografia}" class="btn" th:text="#{boton.ver.puntuaciones.geografia}">Ver mis puntuaciones de geografía</a>  
+             
+            <!-- Botón de Administración visible solo para ADMIN y EDUCADOR -->
+            <div th:if="${mostrarAdministracion}">
+                <a th:href="@{/administracion}" class="btn" style="background-color: #f39c12;" th:text="#{boton.administracion}">
+                    Administración
+                </a>
+            </div>
+    
+        </div>
+    </div>
+
+</body>
+</html>

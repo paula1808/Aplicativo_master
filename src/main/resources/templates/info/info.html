@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title th:text="#{titulo.pagina}">Acerca de Learn_Topic</title>
+  <style>
+    body {
+      font-family: var(--tipo-principal);
+      font-size: 100%;
+      line-height: 1.4em;
+      min-height: 100vh;
+      background-color: #2b3e52;
+      color: var(--negro);
+      -webkit-hyphens: auto;
+              hyphens: auto;
+      font-smooth: always;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      display: flex;
+      flex-flow: row nowrap;
+      justify-content: center;
+      align-items: center;
+    }
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+      background: white;
+      padding: 20px 40px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    h1 {
+      color: #2c3e50;
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    .avatar {
+      display: block;
+      margin: 0 auto 20px auto;
+      width: 150px;
+      height: 150px;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+    .info-text {
+      font-size: 18px;
+      color: #7f8c8d;
+      text-align: justify;
+      margin-bottom: 30px;
+    }
+    .actions {
+      text-align: center;
+    }
+    .btn {
+      display: inline-block;
+      padding: 10px 20px;
+      background: #3498db;
+      color: white;
+      text-decoration: none;
+      border-radius: 5px;
+      margin: 10px;
+      transition: background 0.3s;
+    }
+    .btn:hover {
+      background: #2980b9;
+    }
+    .btn-danger {
+      background: #e74c3c;
+    }
+    .btn-danger:hover {
+      background: #c0392b;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1 th:text="#{titulo.learn_topic}">Learn_Topic</h1>
+    
+    <!-- Imagen del avatar -->
+    <img class="avatar" th:src="@{/img/avatar.png}" alt="Avatar de Learn_Topic">
+    
+    <p class="info-text" th:text="#{descripcion.learn_topic}">
+      Bienvenidos a <strong>Learn_Topic</strong>, una plataforma innovadora dedicada a transformar el aprendizaje para niños en etapa escolar (primaria). Aquí creemos que la educación debe ser interactiva, lúdica y, sobre todo, emocionante.
+    </p>
+    
+    <div class="actions">
+      <a th:href="@{/home}" class="btn btn-danger" th:text="#{boton.volver.menu}">Volver al Menú Principal</a>
+    </div>
+  </div>
+</body>
+</html>

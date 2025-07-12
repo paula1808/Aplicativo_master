@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="#{titulo.pagina}">Juegos Matemáticos</title>
+<style>
+		body {
+		  font-family: var(--tipo-principal);
+		  font-size: 100%;
+		  line-height: 1.4em;
+		  min-height: 100vh;
+		  background-color: #2b3e52;
+		  color: var(--negro);
+		  -webkit-hyphens: auto;
+		          hyphens: auto;
+		  font-smooth: always;
+		  -webkit-font-smoothing: antialiased;
+		  -moz-osx-font-smoothing: grayscale;
+		  display: flex;
+		  flex-flow: row nowrap;
+		  justify-content: center;
+		  align-items: center;
+		}
+        .container {
+		  width: 90%;
+		  max-width: 120em;
+		  padding: 2em;
+		  color: var(--negro);
+		  transition: all 0.4s ease;
+		  border-radius: 1em;
+		  background-color: #1c2b3a ;
+		  box-shadow: 1em 1em 2em var(--sombra-ppal), -1em -1em 2em var(--sombra-sec), inset 0 0 0 transparent, inset 0 0 0 transparent;
+		  overflow: hidden;
+		  display: block;
+		}
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 30px;
+        }
+        .game-options {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .game-card {
+            width: 200px;
+            padding: 20px;
+            background: #4CAF50;
+            color: white;
+            border-radius: 8px;
+            text-decoration: none;
+            transition: transform 0.3s, background 0.3s;
+        }
+        .game-card:hover {
+            transform: translateY(-5px);
+            background: #45a049;
+        }
+        .results-btn {
+            display: inline-block;
+            padding: 12px 25px;
+            background: #3230bd;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            margin-top: 20px;
+            transition: background 0.3s;
+        }
+        .results-btn:hover {
+            background: #2980b9;
+        }
+        
+        .home-btn {
+        	background-color: #e74c3c;
+        	display: inline-block;
+            padding: 12px 25px;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            margin-top: 20px;
+            transition: background 0.3s;  
+        }
+        .home-btn:hover {
+        	background-color: #c0392b;  
+        }
+        
+        .titulo {
+		    display: flex;
+		    flex-direction: column;
+		    align-items: center;
+		    justify-content: center;
+		    text-align: center;
+		    width: 100%;
+		    padding: 20px;
+		}
+		
+		h1 {
+		    font-size: 28px;
+		    color: white;
+		    margin-bottom: 20px;
+		}
+		.cali-btn {
+		    flex-direction: column;
+		    align-items: center;
+		    justify-content: center;
+		    text-align: center;
+		    width: 100%;
+		    padding: 10px;
+		}
+		.menu-btn {
+		    flex-direction: column;
+		    align-items: center;
+		    justify-content: center;
+		    text-align: center;
+		    width: 100%;	
+		}
+        
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="titulo">
+            <h1 th:text="#{titulo.juegos}">Juegos Matemáticos</h1>
+        </div>
+        
+        <div class="game-options">
+            <a th:href="@{/juegos/matematicas/geometria}" class="game-card">
+                <h3 th:text="#{juego.geometria}">Geometría</h3>
+                <p th:text="#{descripcion.geometria}">Adivina la figura oculta</p>
+            </a>
+            
+            <a th:href="@{/juegos/matematicas/operaciones}" class="game-card">
+                <h3 th:text="#{juego.operaciones}">Operaciones</h3>
+                <p th:text="#{descripcion.operaciones}">Resuelve problemas matemáticos</p>
+            </a>
+            
+            <a th:href="@{/juegos/matematicas/clasificacion}" class="game-card">
+                <h3 th:text="#{juego.clasificacion}">Clasificación</h3>
+                <p th:text="#{descripcion.clasificacion}">Ordena los números correctamente</p>
+            </a>
+        </div>
+        
+        <div class="cali-btn">
+            <a th:href="@{/juegos/puntuaciones/lista-geometria}" class="results-btn" th:text="#{boton.ver.geometria}">
+                Ver Resultados de Geometría
+            </a>
+            <a href="/juegos/puntuaciones/clasificacion" class="results-btn" th:text="#{boton.ver.clasificacion}">
+                Ver resultados de clasificación
+            </a>
+        </div>
+
+        <div class="menu-btn">
+            <a th:href="@{/home}" class="home-btn" th:text="#{boton.volver.menu}">
+                Volver al Menú Principal
+            </a>
+        </div>
+                   <script>
+				        function redirigir() {
+				            var juegoSeleccionado = document.getElementById("tipoJuego").value;
+				            window.location.href = "/juegos/matematicas/" + juegoSeleccionado;
+				        }
+				    </script>
+    </div>
+</body>
+</html>

@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="#{titulo.resultados}">Resultados - Clasificación de Números</title>
+    
+    <style>
+		body {
+		  font-family: var(--tipo-principal);
+		  font-size: 100%;
+		  line-height: 1.4em;
+		  min-height: 100vh;
+		  background-color: #2b3e52;
+		  color: var(--negro);
+		  -webkit-hyphens: auto;
+		          hyphens: auto;
+		  font-smooth: always;
+		  -webkit-font-smoothing: antialiased;
+		  -moz-osx-font-smoothing: grayscale;
+		  display: flex;
+		  flex-flow: row nowrap;
+		  justify-content: center;
+		  align-items: center;
+		}
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .mensaje {
+            font-size: 22px;
+            font-weight: bold;
+            color: #4CAF50;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .empty-message {
+            text-align: center;
+            color: #7f8c8d;
+            padding: 20px;
+            font-style: italic;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background-color: #4CAF50;
+            color: white;
+            font-weight: bold;
+        }
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        tr:hover {
+            background-color: #e9e9e9;
+        }
+        .actions {
+            margin-top: 20px;
+            text-align: center;
+        }
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background: #3498db;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            margin: 0 10px;
+            transition: background 0.3s;
+        }
+        .btn:hover {
+            background: #2980b9;
+        }
+        .btn-danger {
+            background: #e74c3c;
+        }
+        .btn-danger:hover {
+            background: #c0392b;
+        }
+    </style>
+
+</head>
+<body>
+    <div class="container">
+        <h1 th:text="#{encabezado.resultados}">Resultados Clasificación numérica</h1>
+        
+        <!-- Si la lista de resultados está vacía, se muestra este mensaje -->
+        <div th:if="${#lists.isEmpty(resultados)}">
+            <p class="empty-message" th:text="#{mensaje.vacio}">No hay resultados registrados todavía.</p>
+        </div>
+        
+        <!-- Si la lista de resultados no está vacía, se muestra la tabla -->
+        <table th:if="${!#lists.isEmpty(resultados)}">
+            <thead>
+                <tr>
+                    <th th:text="#{tabla.usuario}">Usuario</th>
+                    <th th:text="#{tabla.ronda}">Ronda</th>
+                    <th th:text="#{tabla.aciertos}">Aciertos</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="resultado : ${resultados}">
+                    <td th:text="${resultado.usuario}">Usuario</td>
+                    <td th:text="${resultado.ronda}">0</td>
+                    <td th:text="${resultado.puntuacion} + '%'" 
+                        th:style="${resultado.puntuacion >= 80} ? 'color:green;' : (${resultado.puntuacion >= 50} ? 'color:orange;' : 'color:red;')">
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        
+        <div class="actions">
+            <a th:href="@{/juegos/home-matematicas}" class="btn" th:text="#{boton.volver}">Volver al inicio</a>
+            <a th:href="@{/juegos/matematicas/clasificacion(ronda=1)}" class="btn" th:text="#{boton.jugar}">Jugar nuevamente</a>
+            <form th:action="@{/juegos/puntuaciones/eliminar}" method="post" style="display: inline;">
+                <button type="submit" class="btn btn-danger" th:text="#{boton.borrar}">Borrar Resultados</button>
+            </form>
+        </div>
+    </div>
+</body>
+</html>
