@@ -67,7 +67,7 @@ pipeline {
             }
         }
 
-        sstage('Configurar kubeconfig EKS') {
+        stage('Configurar kubeconfig EKS') {
             steps {
                 sh '''
                   mkdir -p ~/.kube
