@@ -100,11 +100,11 @@ pipeline {
         }
     }
 
-    post {
-        failure {
-            mail to: 'paulagalindo1@hotmail.com',
-                 subject: "🚨 Fallo en el pipeline ${env.JOB_NAME} #${env.BUILD_NUMBER}",
-                 body: "Revisa Jenkins para más detalles: ${env.BUILD_URL}"
-        }
-    }
+    //post {
+      //  failure {
+        //    mail to: 'paulagalindo1@hotmail.com',
+          //       subject: "🚨 Fallo en el pipeline ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+            //     body: "Revisa Jenkins para más detalles: ${env.BUILD_URL}"
+        //}
+    //}
 }
