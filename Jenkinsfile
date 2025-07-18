@@ -61,7 +61,9 @@ pipeline {
             steps {
                 script {
                     docker.withRegistry('', DOCKER_CREDENTIALS_ID) {
-                        docker.image("${IMAGE}:${BUILD_NUMBER}").push()
+                        def image = docker.image("${IMAGE}:${BUILD_NUMBER}")
+                        image.push()
+                        image.push('latest') // 👈 añade esto para que haya un `:latest`
                     }
                 }
             }
