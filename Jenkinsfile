@@ -90,6 +90,8 @@ pipeline {
                     sh '''
                     kubectl config current-context
                     kubectl apply -f k8s/mysql-deployment.yaml
+                    echo "Contenido del archivo mysql-service.yaml:"
+                    cat k8s/mysql-service.yaml
                     kubectl apply -f k8s/mysql-service.yaml
                     kubectl apply -f k8s/spring-deployment.yaml
                     kubectl apply -f k8s/spring-service.yaml
