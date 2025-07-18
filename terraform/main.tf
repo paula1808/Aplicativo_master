@@ -18,7 +18,11 @@ resource "aws_eks_cluster" "cluster" {
   role_arn = "arn:aws:iam::711616153649:role/LabRole"
 
   vpc_config {
-    subnet_ids = ["subnet-0d785769ce64bdce8","subnet-07e1e6b4dd2893b27","subnet-0ce441e8c985b81a1","subnet-033f37c1eb864e5bd","subnet-0d2011ba5d5db817f"]
+    subnet_ids = ["subnet-0b485d34e92bbdf20",
+"subnet-044fb73d4d107165b",
+"subnet-0e8335be67530a00d",
+"subnet-08dbb50c6e579f18b",
+"subnet-0ae99c6a2db29e1e2"]
   }
 
   version = "1.28"
@@ -28,13 +32,11 @@ resource "aws_eks_node_group" "node_group" {
   cluster_name    = aws_eks_cluster.cluster.name
   node_group_name = "default"
   node_role_arn   = "arn:aws:iam::711616153649:role/LabRole"
-  subnet_ids = [
-    "subnet-0d785769ce64bdce8",
-    "subnet-07e1e6b4dd2893b27",
-    "subnet-0ce441e8c985b81a1",
-    "subnet-033f37c1eb864e5bd",
-    "subnet-0d2011ba5d5db817f"
-  ]
+  subnet_ids = ["subnet-0b485d34e92bbdf20",
+"subnet-044fb73d4d107165b",
+"subnet-0e8335be67530a00d",
+"subnet-08dbb50c6e579f18b",
+"subnet-0ae99c6a2db29e1e2"]
 
   scaling_config {
     desired_size = 2
@@ -42,6 +44,6 @@ resource "aws_eks_node_group" "node_group" {
     min_size     = 1
   }
 
-  instance_types = ["t3.medium"]
+  instance_types = ["t2.large"]
 }
 
