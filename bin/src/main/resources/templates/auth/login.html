@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="#{titulo.pagina}">Login</title>
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+</head>
+<body class="login-back">
+    <div class="login">
+      <div class="login-screen">
+        <div class="app-title">
+          <h1 th:text="#{titulo.login}">¡Bienvenido!</h1>
+        </div>
+        
+        <form th:action="@{/login}" method="post">
+        <div class="login-form">
+          <div class="control-group">
+            <input type="text" class="login-field" name="username" placeholder="Usuario" id="login-name" th:placeholder="#{etiqueta.usuario}">
+            <label class="login-field-icon fui-user" for="login-name"></label>
+          </div>
+  
+          <div class="control-group">
+            <input type="password" class="login-field" name="password" placeholder="Contraseña" id="login-pass" th:placeholder="#{etiqueta.contrasena}">
+            <label class="login-field-icon fui-lock" for="login-pass"></label>
+          </div>
+  
+          <button class="btn" type="submit" th:text="#{boton.ingresar}">Ingresar</button>    
+        </form>
+        <a class="login-link" th:href="@{/registro}" th:text="#{boton.crear.cuenta}">Crear cuenta</a>
+        
+        <!-- Selector de idioma en la pantalla de inicio -->
+        <form action="" method="get">
+            <label for="langSelect" class="form-label" th:text="#{seleccionar.idioma}">Seleccionar idioma:</label>
+            <select name="lang" id="langSelect" class="form-select" onchange="this.form.submit()">
+                <option value="es" th:selected="${#locale.language == 'es'}">Español</option>
+                <option value="en" th:selected="${#locale.language == 'en'}">English</option>
+                <option value="pt" th:selected="${#locale.language == 'pt'}">Português</option>
+            </select>
+        </form>
+        </div>
+      </div>
+    </div>
+</body>
+</html>

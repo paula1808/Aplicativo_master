@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title th:text="#{titulo.pagina}">Clasificación de Números</title>
+  <style>
+    /* Estilos Globales */
+    body {
+      font-family: var(--tipo-principal, Arial, sans-serif);
+      font-size: 100%;
+      line-height: 1.4em;
+      min-height: 100vh;
+      background-color: #2b3e52;
+      color: var(--negro, #000);
+      -webkit-hyphens: auto;
+              hyphens: auto;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin: 0;
+      padding: 20px;
+      text-align: center;
+    }
+    .container {
+      background: #fff;
+      max-width: 1000px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 20px 40px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+    h1 {
+      color: #2c3e50;
+      margin-bottom: 20px;
+    }
+    /* Imágenes para los números */
+    .numero-img {
+      width: 100px;
+      cursor: pointer;
+      transition: transform 0.3s;
+      margin: 10px;
+    }
+    .numero-img:hover {
+      transform: scale(1.05);
+    }
+    .seleccionado {
+      border: 3px solid green;
+    }
+    /* Mensajes y botones */
+    .mensaje {
+      font-size: 20px;
+      font-weight: bold;
+      margin: 20px 0;
+    }
+    button {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 4px;
+      background: #3498db;
+      color: white;
+      cursor: pointer;
+      transition: background 0.3s;
+      margin: 10px;
+    }
+    button:hover {
+      background: #2980b9;
+    }
+    /* Enlaces */
+    a {
+      display: inline-block;
+      margin-top: 20px;
+      padding: 10px 20px;
+      background: #e74c3c;
+      color: white;
+      text-decoration: none;
+      border-radius: 4px;
+      transition: background 0.3s;
+    }
+    a:hover {
+      background: #c0392b;
+    }
+    /* Responsive */
+    @media (max-width: 600px) {
+      .numero-img {
+        width: 80px;
+        margin: 5px;
+      }
+      h1 {
+        font-size: 24px;
+      }
+      button, a {
+        width: 100%;
+        box-sizing: border-box;
+      }
+      .container {
+        padding: 15px 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1 th:text="#{titulo.instruccion}">Seleccione los números impares</h1>
+    
+    <div>
+      <img th:src="@{${imagenes[0]}}" class="numero-img" th:onclick="'seleccionarNumero(' + ${numeros[0]} + ', this)'">
+      <img th:src="@{${imagenes[1]}}" class="numero-img" th:onclick="'seleccionarNumero(' + ${numeros[1]} + ', this)'">
+      <img th:src="@{${imagenes[2]}}" class="numero-img" th:onclick="'seleccionarNumero(' + ${numeros[2]} + ', this)'">
+    </div>
+    
+    <p id="resultado" class="mensaje"></p>
+    <button onclick="validarSeleccion()" th:text="#{boton.validar}">Validar respuesta</button>
+    
+    <!-- Inyección del array de números y cálculo de totalCorrect -->
+    <script th:inline="javascript">
+      /*<![CDATA[*/
+      var numeros = [[${numeros}]]; // Ej. [27, 98, 1023]
+      var totalCorrect = numeros.filter(function(n) { return n % 2 != 0; }).length;
+      /*]]>*/
+    </script>
+    
+    <script>
+      var seleccionados = [];
+      
+      function seleccionarNumero(numero, element) {
+        if (!seleccionados.includes(numero)) {
+          seleccionados.push(numero);
+          element.classList.add("seleccionado");
+        } else {
+          seleccionados = seleccionados.filter(function(n) { return n !== numero; });
+          element.classList.remove("seleccionado");
+        }
+      }
+      
+      function validarSeleccion() {
+        // Calcular respuestas correctas e incorrectas
+        var selectedCorrect = seleccionados.filter(function(n) { return n % 2 !== 0; }).length;
+        var selectedWrong = seleccionados.length - selectedCorrect;
+        
+        // Aplicar la fórmula con penalización
+        var computedScore = Math.max(0, ((selectedCorrect - selectedWrong) / totalCorrect) * 100);
+        document.getElementById("resultado").innerText = "Puntuación: " + computedScore.toFixed(0) + "%";
+        
+        // Obtener la ronda actual de la URL
+        var rondaActual = parseInt(new URL(window.location.href).searchParams.get("ronda")) || 1;
+        
+        // Guardar la puntuación en la base de datos
+        fetch('/juegos/matematicas/guardar-puntuacion', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ronda: rondaActual, puntuacion: Math.round(computedScore) })
+        })
+        .then(function(response) {
+          if (!response.ok) {
+            throw new Error("Error guardando la puntuación");
+          }
+          if (rondaActual >= 5) {
+            window.location.href = "/juegos/home-matematicas";
+          } else {
+            window.location.href = "/juegos/matematicas/nueva-ronda?ronda=" + (rondaActual + 1);
+          }
+        })
+        .catch(function(error) {
+          console.error('Error:', error);
+        });
+      }
+    </script>
+    
+    <br>
+    <a href="/juegos/home-matematicas" th:text="#{enlace.volver}">Volver al inicio</a>
+  </div>
+</body>
+</html>

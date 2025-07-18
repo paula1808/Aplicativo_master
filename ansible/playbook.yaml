@@ -1,0 +1,29 @@
+- name: Desplegar en EKS
+  hosts: localhost
+  become: yes                # Para ejecutar comandos con privilegios sudo
+
+  vars:
+    ansible_python_interpreter: /usr/bin/python3
+
+  tasks:
+    - name: Asegurar que pip esté instalado
+      apt:
+        name: python3-pip
+        state: present
+      when: ansible_os_family == "Debian"
+
+    - name: Instalar la librería kubernetes para Python vía apt
+      apt:
+       name: python3-kubernetes
+       state: present
+
+    - name: Aplicar manifiestos Kubernetes
+      kubernetes.core.k8s:
+        state: present
+        src: "{{ item }}"
+        kubeconfig: "/home/paula/.kube/config"
+      loop: 
+        - "../k8s/mysql-deployment.yaml"
+        - "../k8s/mysql-service.yaml"
+        - "../k8s/spring-service.yaml"
+        - "../k8s/spring-deployment.yaml"

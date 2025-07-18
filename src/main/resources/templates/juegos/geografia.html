@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title th:text="#{titulo.pagina}">Juego de Geografía</title>
+  <style>
+    body {
+      font-family: var(--tipo-principal, Arial, sans-serif);
+      font-size: 100%;
+      line-height: 1.4em;
+      min-height: 100vh;
+      background-color: #2b3e52;
+      color: var(--negro, #000);
+      -webkit-hyphens: auto;
+              hyphens: auto;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      display: flex;
+      flex-flow: row nowrap;
+      justify-content: center;
+      align-items: center;
+      margin: 0;
+      padding: 20px;
+    }
+    .container {
+      background: #fff;
+      max-width: 800px;
+      width: 100%;
+      margin: 0 auto;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      padding: 20px 40px;
+    }
+    h1 {
+      color: #2c3e50;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .pregunta {
+      font-size: 20px;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+    .imagen-container {
+      margin: 20px auto;
+      border: 2px solid #ccc;
+      padding: 10px;
+      border-radius: 8px;
+      width: 400px;
+      height: auto;
+    }
+    .imagen-container img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 4px;
+    }
+    .opciones {
+      margin-top: 20px;
+      text-align: center;
+    }
+    .opciones button {
+      margin: 10px;
+      padding: 10px 20px;
+      font-size: 16px;
+      background: #3498db;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    .opciones button:hover {
+      background: #2980b9;
+    }
+    #mensaje {
+      margin-top: 20px;
+      font-size: 18px;
+      font-weight: bold;
+      text-align: center;
+    }
+    .acciones {
+      margin-top: 20px;
+      text-align: center;
+    }
+    .acciones button {
+      margin: 20px 10px 0;
+      padding: 10px 20px;
+      font-size: 16px;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    .btn-next {
+      background: #2ecc71;
+    }
+    .btn-next:hover {
+      background: #27ae60;
+    }
+    .btn-home {
+      background: #e74c3c;
+    }
+    .btn-home:hover {
+      background: #c0392b;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1 th:text="#{titulo.juego}">Juego de Geografía</h1>
+    
+    <p class="pregunta" th:text="#{pregunta.region}">¿Qué región de Colombia es la que se muestra en la imagen?</p>
+    
+    <div class="imagen-container">
+      <img id="departamentoImg" src="" alt="Departamento">
+    </div>
+    
+    <div class="opciones">
+      <button onclick="enviarRespuesta('Andina')" th:text="#{opcion.andina}">Andina</button>
+      <button onclick="enviarRespuesta('Caribe')" th:text="#{opcion.caribe}">Caribe</button>
+      <button onclick="enviarRespuesta('Pacífico')" th:text="#{opcion.pacifico}">Pacífico</button>
+      <button onclick="enviarRespuesta('Orinoquía')" th:text="#{opcion.orinoquia}">Orinoquía</button>
+      <button onclick="enviarRespuesta('Amazonía')" th:text="#{opcion.amazonia}">Amazonía</button>
+    </div>
+    
+    <p id="mensaje"></p>
+    
+    <div class="acciones">
+      <button id="btnNext" class="btn-next" style="display:none;" onclick="siguientePregunta()" th:text="#{boton.siguiente}">Siguiente</button>
+      <button id="btnHome" class="btn-home" style="display:inline-block;" onclick="window.location.href='/home'" th:text="#{boton.volver.menu}">Volver al Menú Principal</button>
+    </div>
+    <script>
+      console.log("Script de geografía cargado");
+      
+      // Array de preguntas (5 departamentos de Colombia)
+      var preguntas = [
+        { imagen: "/img/geografia/andina.png", respuesta: "Andina" },
+        { imagen: "/img/geografia/caribe.png", respuesta: "Caribe" },
+        { imagen: "/img/geografia/pacifico.png", respuesta: "Pacífico" },
+        { imagen: "/img/geografia/orinoquia.png", respuesta: "Orinoquía" },
+        { imagen: "/img/geografia/amazonia.png", respuesta: "Amazonía" }
+      ];
+      
+      // Función para barajar el array (Fisher-Yates shuffle)
+      function shuffle(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+          let j = Math.floor(Math.random() * (i + 1));
+          [array[i], array[j]] = [array[j], array[i]];
+        }
+      }
+      
+      // Barajar y preparar las preguntas
+      shuffle(preguntas);
+      var currentIndex = 0;
+      // Variable que guarda la respuesta correcta de la pregunta actual
+      var respuestaCorrecta = preguntas[currentIndex].respuesta;
+      
+      // Cargar la primera imagen
+      document.getElementById("departamentoImg").src = preguntas[currentIndex].imagen;
+      
+      // Bandera para controlar si ya se respondió la pregunta actual
+      var respuestaSeleccionada = false;
+      
+      // Función para evaluar la respuesta del usuario
+      function enviarRespuesta(opcion) {
+        if (respuestaSeleccionada) return;
+        respuestaSeleccionada = true;
+        
+        var esCorrecto = opcion.trim().toLowerCase() === respuestaCorrecta.trim().toLowerCase();
+        var mensaje = esCorrecto
+          ? "Correcto"
+          : "Incorrecto. La respuesta correcta es: " + respuestaCorrecta;
+        document.getElementById("mensaje").innerText = mensaje;
+        
+        // Guardar el resultado en la base de datos
+        guardarPuntuacionGeografia(esCorrecto);
+        
+        // Si aún quedan preguntas, mostrar botón para pasar a la siguiente.
+        // Si es la última, solo se muestra el botón para regresar a inicio.
+        if (currentIndex < preguntas.length - 1) {
+          document.getElementById("btnNext").style.display = "inline-block";
+          document.getElementById("btnHome").style.display = "inline-block";
+        } else {
+          document.getElementById("btnHome").style.display = "inline-block";
+        }
+      }
+      
+      // Función para guardar los datos en la base de datos
+      function guardarPuntuacionGeografia(victoria) {
+        fetch('/juegos/guardar-puntuacion-geografia', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ victoria: victoria })
+        })
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Error al guardar la puntuación');
+          }
+          console.log('Puntuación guardada correctamente');
+        })
+        .catch(error => {
+          console.error('Error:', error);
+        });
+      }
+      
+      // Función para cargar la siguiente pregunta
+      function siguientePregunta() {
+        // Incrementa el índice para la siguiente pregunta
+        currentIndex++;
+        if (currentIndex < preguntas.length) {
+          respuestaSeleccionada = false;
+          // Limpiar el mensaje de retroalimentación
+          document.getElementById("mensaje").innerText = "";
+          // Actualizar la respuesta correcta y la imagen
+          respuestaCorrecta = preguntas[currentIndex].respuesta;
+          document.getElementById("departamentoImg").src = preguntas[currentIndex].imagen;
+          // Ocultar el botón de Siguiente para la nueva pregunta
+          document.getElementById("btnNext").style.display = "none";
+        }
+      }
+    </script>
+  </div>
+</body>
+</html>
