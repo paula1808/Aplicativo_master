@@ -69,6 +69,16 @@ pipeline {
             }
         }
 
+        stage('Actualizar Deployment con tag') {
+            steps {
+                script {
+                    sh """
+                    sed -i 's|image: paulagalindo/sistema-academico:latest|image: paulagalindo/sistema-academico:${BUILD_NUMBER}|g' k8s/spring-deployment.yaml
+                    """
+                }
+            }
+        }
+
         stage('Configurar kubeconfig EKS') {
             steps {
                 sh '''
