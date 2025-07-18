@@ -39,7 +39,7 @@ pipeline {
         }
         stage('Checkout') {
             steps {
-                git url: 'https://github.com/paula1808/Aplicativo_master.git', branch: 'main'
+                git url: 'https://github.com/paula1808/Aplicativo_master.git', branch: 'master'
             }
         }
 
