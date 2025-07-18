@@ -96,7 +96,7 @@ pipeline {
                     kubectl apply -f k8s/spring-service.yaml
                     '''
                 }
-            }
+            
         }
     }
 
