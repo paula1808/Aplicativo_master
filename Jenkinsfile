@@ -86,7 +86,7 @@ pipeline {
 
         stage('Despliegue Kubernetes') {
             steps {
-                withCredentials([file(credentialsId: KUBECONFIG_CREDENTIAL_ID, variable: 'KUBECONFIG')]) {
+               // withCredentials([file(credentialsId: KUBECONFIG_CREDENTIAL_ID, variable: 'KUBECONFIG')]) {
                     sh '''
                     kubectl config use-context kubernetes-admin@kubernetes
                     kubectl set image deployment/app-deployment app=${IMAGE}:${BUILD_NUMBER} --namespace=default
