@@ -99,7 +99,16 @@ pipeline {
                 }
             
         }
+        stage('Obtener DNS del LoadBalancer') {
+            steps {
+                script {
+                    def externalIp = sh(script: "kubectl get svc sistema-service -o jsonpath='{.status.loadBalancer.ingress[0].hostname}'", returnStdout: true).trim()
+                    echo "📡 DNS del LoadBalancer: http://${externalIp}"
+                }
+            }
+        } 
     }
+          
 
     //post {
       //  failure {
