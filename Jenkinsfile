@@ -76,13 +76,13 @@ pipeline {
             }
         }
 
-        stage('Despliegue con Ansible') {
-            steps {
-                dir('ansible') {
-                    sh 'ansible-playbook -i inventory.ini playbook.yaml'
-                }
-            }
-        }
+       // ('Despliegue con Ansible') {
+         //   steps {
+           //     dir('ansible') {
+             //       sh 'ansible-playbook -i inventory.ini playbook.yaml'
+               // }
+            //}
+        //}
 
         stage('Despliegue Kubernetes') {
             steps {
