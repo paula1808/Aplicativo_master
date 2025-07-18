@@ -4,7 +4,7 @@ pipeline {
     environment {
         AWS_ACCESS_KEY_ID     = credentials('aws-access-key')      // credencial tipo Secret text
         AWS_SECRET_ACCESS_KEY = credentials('aws-secret-key')      // credencial tipo Secret text
-        AWS_SESSION_TOKEN = credentials('aws-session-token')
+        AWS_SESSION_TOKEN = credentials('aws_session_token')
         AWS_REGION            = 'us-east-1'
 
         IMAGE = 'docker.io/paulagalindo/sistema-academico'
