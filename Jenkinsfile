@@ -88,7 +88,7 @@ pipeline {
             steps {
                // withCredentials([file(credentialsId: KUBECONFIG_CREDENTIAL_ID, variable: 'KUBECONFIG')]) {
                     sh '''
-                    kubectl config use-context kubernetes-admin@kubernetes
+                    kubectl config current-context
                     kubectl set image deployment/app-deployment app=${IMAGE}:${BUILD_NUMBER} --namespace=default
                     kubectl apply -f k8s/mysql-deployment.yaml
                     kubectl apply -f k8s/mysql-service.yaml
