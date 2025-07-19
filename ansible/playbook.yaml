@@ -1,29 +1,42 @@
-- name: Desplegar en EKS
+- name: Despliegue del stack ELK en Kubernetes
   hosts: localhost
-  become: yes                # Para ejecutar comandos con privilegios sudo
-
   vars:
-    ansible_python_interpreter: /usr/bin/python3
-
+    namespace: elk
   tasks:
-    - name: Asegurar que pip esté instalado
-      apt:
-        name: python3-pip
-        state: present
-      when: ansible_os_family == "Debian"
+    - name: Agregar repositorio Helm
+      shell: helm repo add elastic https://helm.elastic.co && helm repo update
 
-    - name: Instalar la librería kubernetes para Python vía apt
-      apt:
-       name: python3-kubernetes
-       state: present
+    - name: Crear namespace ELK
+      shell: kubectl create namespace {{ namespace }}
+      ignore_errors: yes
 
-    - name: Aplicar manifiestos Kubernetes
-      kubernetes.core.k8s:
-        state: present
-        src: "{{ item }}"
-        kubeconfig: "/home/paula/.kube/config"
-      loop: 
-        - "../k8s/mysql-deployment.yaml"
-        - "../k8s/mysql-service.yaml"
-        - "../k8s/spring-service.yaml"
-        - "../k8s/spring-deployment.yaml"
+    - name: Instalar Elasticsearch
+      shell: helm install elasticsearch elastic/elasticsearch --namespace {{ namespace }}
+
+    - name: Instalar Kibana
+      shell: helm install kibana elastic/kibana --namespace {{ namespace }}
+
+    - name: Instalar Filebeat
+      shell: |
+        helm install filebeat elastic/filebeat --namespace {{ namespace }} \
+        --set daemonset.enabled=true \
+        --set filebeatConfig.filebeat.yml.output.elasticsearch.hosts='["http://elasticsearch-master:9200"]'
+
+    - name: Crear servicio LoadBalancer para Kibana
+      copy:
+        dest: /tmp/kibana-service.yaml
+        content: |
+          apiVersion: v1
+          kind: Service
+          metadata:
+            name: kibana-lb
+            namespace: {{ namespace }}
+          spec:
+            type: LoadBalancer
+            ports:
+              - port: 80
+                targetPort: 5601
+            selector:
+              app: kibana
+    - name: Aplicar servicio LoadBalancer
+      shell: kubectl apply -f /tmp/kibana-service.yaml

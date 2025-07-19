@@ -10,6 +10,7 @@ pipeline {
         IMAGE = 'docker.io/paulagalindo/sistema-academico'
         DOCKER_CREDENTIALS_ID = 'dockerhub'
         KUBECONFIG_CREDENTIAL_ID = 'kubeconfig'
+        JMETER_CMD = 'jmeter'
     }
 
     stages {
@@ -88,13 +89,13 @@ pipeline {
             }
         }
 
-       // ('Despliegue con Ansible') {
-         //   steps {
-           //     dir('ansible') {
-             //       sh 'ansible-playbook -i inventory.ini playbook.yaml'
-               // }
-            //}
-        //}
+        stage('Desplegar ELK con Ansible') {
+            steps {
+                dir('ansible') {
+                sh 'ansible-playbook -i inventory.ini playbook.yaml'
+                }
+            }
+        }
 
         stage('Despliegue Kubernetes') {
             steps {
@@ -119,6 +120,8 @@ pipeline {
                 }
             }
         } 
+        
+        
     }
           
 
