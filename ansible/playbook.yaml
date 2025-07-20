@@ -28,7 +28,7 @@
       file:
         path: /tmp/aws-ebs-csi-driver
         state: absent
-        
+      become: true
     - name: Clonar repo aws-ebs-csi-driver si no existe
       git:
         repo: https://github.com/kubernetes-sigs/aws-ebs-csi-driver.git
