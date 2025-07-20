@@ -1,26 +1,131 @@
-- name: Despliegue del stack ELK en Kubernetes
+- name: Despliegue del stack ELK en Kubernetes con corrección AWS EBS CSI Driver
   hosts: localhost
   vars:
     namespace: elk
   tasks:
-    - name: Agregar repositorio Helm
+
+    - name: Instalar Helm si no está presente
+      become: yes
+      shell: |
+        curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+      args:
+        creates: /usr/local/bin/helm
+
+    - name: Agregar repositorio Helm elastic
       shell: helm repo add elastic https://helm.elastic.co && helm repo update
 
     - name: Crear namespace ELK
       shell: kubectl create namespace {{ namespace }}
       ignore_errors: yes
 
-    - name: Instalar Elasticsearch
-      shell: helm install elasticsearch elastic/elasticsearch --namespace {{ namespace }}
+    - name: Clonar repo aws-ebs-csi-driver si no existe
+      git:
+        repo: https://github.com/kubernetes-sigs/aws-ebs-csi-driver.git
+        version: v1.7.0
+        dest: /tmp/aws-ebs-csi-driver
+        force: yes
+      delegate_to: localhost
 
-    - name: Instalar Kibana
-      shell: helm install kibana elastic/kibana --namespace {{ namespace }}
-
-    - name: Instalar Filebeat
+    - name: Reemplazar apiVersion 'policy/v1beta1' por 'policy/v1' en todos los YAML del repo clonado
       shell: |
-        helm install filebeat elastic/filebeat --namespace {{ namespace }} \
-        --set daemonset.enabled=true \
-        --set filebeatConfig.filebeat.yml.output.elasticsearch.hosts='["http://elasticsearch-master:9200"]'
+        find /tmp/aws-ebs-csi-driver/deploy/kubernetes/ -type f -name '*.yaml' -exec sed -i 's/apiVersion: policy\/v1beta1/apiVersion: policy\/v1/g' {} +
+      delegate_to: localhost
+
+    - name: Corregir kustomization.yaml (bases → resources)
+      replace:
+        path: /tmp/aws-ebs-csi-driver/deploy/kubernetes/overlays/stable/kustomization.yaml
+        regexp: '^bases:'
+        replace: 'resources:'
+      delegate_to: localhost
+
+    - name: Aplicar manifiesto AWS EBS CSI Driver corregido
+      shell: kubectl apply -k /tmp/aws-ebs-csi-driver/deploy/kubernetes/overlays/stable/
+      environment:
+        KUBECONFIG: "{{ lookup('env','HOME') }}/.kube/config"
+      delegate_to: localhost
+
+    - name: Verificar si Elasticsearch ya está instalado
+      command: helm status elasticsearch -n {{ namespace }}
+      register: elasticsearch_status
+      ignore_errors: yes
+
+    - name: Instalar o actualizar Elasticsearch
+      shell: >
+        helm upgrade --install elasticsearch elastic/elasticsearch --namespace {{ namespace }}
+        --set replicas=1
+        --set minimumMasterNodes=1
+        --set volumeClaimTemplate.enabled=false
+        --set resources.requests.cpu=100m
+        --set resources.requests.memory=512Mi
+        --set resources.limits.cpu=500m
+        --set resources.limits.memory=1Gi
+      when: elasticsearch_status.rc != 0
+
+    - name: Verificar si Kibana ya está instalado
+      command: helm status kibana -n {{ namespace }}
+      register: kibana_status
+      ignore_errors: yes
+
+    - name: Instalar o actualizar Kibana
+      shell: >
+        helm upgrade --install kibana elastic/kibana --namespace {{ namespace }}
+        --set resources.requests.cpu=100m
+        --set resources.requests.memory=512Mi
+        --set resources.limits.cpu=500m
+        --set resources.limits.memory=1Gi
+        --set elasticsearch.hosts[0]=http://elasticsearch-master.{{ namespace }}.svc.cluster.local:9200
+        --set elasticsearch.ssl.enabled=false
+        --set elasticsearch.ssl.verificationMode=none
+      when: kibana_status.rc != 0
+
+    - name: Verificar si Filebeat ya está instalado
+      command: helm status filebeat -n {{ namespace }}
+      register: filebeat_status
+      ignore_errors: yes
+
+    - name: Crear manifiesto de RBAC para Filebeat
+      copy:
+        dest: /tmp/filebeat-rbac.yaml
+        content: |
+          apiVersion: v1
+          kind: ServiceAccount
+          metadata:
+            name: filebeat
+            namespace: {{ namespace }}
+          ---
+          apiVersion: rbac.authorization.k8s.io/v1
+          kind: ClusterRole
+          metadata:
+            name: filebeat
+          rules:
+            - apiGroups: [""]
+              resources:
+                - pods
+                - namespaces
+                - nodes
+                - events
+              verbs: ["get", "watch", "list"]
+            - apiGroups: ["apps"]
+              resources:
+                - replicasets
+                - deployments
+              verbs: ["get", "watch", "list"]
+          ---
+          apiVersion: rbac.authorization.k8s.io/v1
+          kind: ClusterRoleBinding
+          metadata:
+            name: filebeat
+          subjects:
+            - kind: ServiceAccount
+              name: filebeat
+              namespace: {{ namespace }}
+          roleRef:
+            kind: ClusterRole
+            name: filebeat
+            apiGroup: rbac.authorization.k8s.io
+
+    - name: Aplicar RBAC para Filebeat
+      shell: kubectl apply -f /tmp/filebeat-rbac.yaml
 
     - name: Crear servicio LoadBalancer para Kibana
       copy:
@@ -38,5 +143,30 @@
                 targetPort: 5601
             selector:
               app: kibana
-    - name: Aplicar servicio LoadBalancer
+              release: kibana
+
+    - name: Crear archivo de configuración values.yaml para Filebeat
+      copy:
+        dest: /tmp/filebeat-values.yaml
+        content: |
+          daemonset:
+            enabled: true
+
+          filebeatConfig:
+            filebeat.yml: |
+              filebeat.inputs:
+                - type: container
+                  paths:
+                    - /var/log/containers/*.log
+              output.elasticsearch:
+                hosts: ["http://elasticsearch-master:9200"]
+
+    - name: Instalar o actualizar Filebeat con Helm usando values.yaml
+      shell: helm upgrade --install filebeat elastic/filebeat -n {{ namespace }} -f /tmp/filebeat-values.yaml
+
+    - name: Eliminar pods antiguos de Filebeat (si existen)
+      shell: kubectl delete pods -n {{ namespace }} -l app=filebeat-filebeat
+      ignore_errors: yes
+
+    - name: Aplicar servicio LoadBalancer para Kibana
       shell: kubectl apply -f /tmp/kibana-service.yaml

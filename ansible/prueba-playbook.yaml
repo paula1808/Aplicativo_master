@@ -1,0 +1,5 @@
+- name: Desplegar ELK Stack en Kubernetes
+  hosts: localhost
+  become: yes
+  roles:
+    - elk
