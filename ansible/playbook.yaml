@@ -18,6 +18,17 @@
       shell: kubectl create namespace {{ namespace }}
       ignore_errors: yes
 
+    - name: Añadir safe directory para git
+      become: false
+      shell: git config --global --add safe.directory /tmp/aws-ebs-csi-driver
+      args:
+        executable: /bin/bash
+
+    - name: Eliminar carpeta aws-ebs-csi-driver si existe
+      file:
+        path: /tmp/aws-ebs-csi-driver
+        state: absent
+        
     - name: Clonar repo aws-ebs-csi-driver si no existe
       git:
         repo: https://github.com/kubernetes-sigs/aws-ebs-csi-driver.git
