@@ -53,6 +53,9 @@
       shell: kubectl apply -k /tmp/aws-ebs-csi-driver/deploy/kubernetes/overlays/stable/
       environment:
         KUBECONFIG: "{{ lookup('env','HOME') }}/.kube/config"
+        AWS_ACCESS_KEY_ID: "{{ lookup('env','AWS_ACCESS_KEY_ID') }}"
+        AWS_SECRET_ACCESS_KEY: "{{ lookup('env','AWS_SECRET_ACCESS_KEY') }}"
+        AWS_SESSION_TOKEN: "{{ lookup('env','AWS_SESSION_TOKEN') }}"
       delegate_to: localhost
 
     - name: Verificar si Elasticsearch ya está instalado
@@ -169,15 +172,17 @@
                 - type: container
                   paths:
                     - /var/log/containers/*.log
+              processors:
+                - add_kubernetes_metadata:
+                    in_cluster: true
               output.elasticsearch:
                 hosts: ["http://elasticsearch-master:9200"]
 
     - name: Instalar o actualizar Filebeat con Helm usando values.yaml
       shell: helm upgrade --install filebeat elastic/filebeat -n {{ namespace }} -f /tmp/filebeat-values.yaml
 
-    - name: Eliminar pods antiguos de Filebeat (si existen)
-      shell: kubectl delete pods -n {{ namespace }} -l app=filebeat-filebeat
-      ignore_errors: yes
+    - name: Reiniciar DaemonSet Filebeat para aplicar cambios
+      shell: kubectl rollout restart daemonset/filebeat -n {{ namespace }}
 
     - name: Aplicar servicio LoadBalancer para Kibana
       shell: kubectl apply -f /tmp/kibana-service.yaml

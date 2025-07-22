@@ -104,7 +104,7 @@ pipeline {
         stage('Desplegar ELK con Ansible') {
             steps {
                 dir('ansible') {
-                sh 'ansible-playbook -i inventory.ini playbook.yaml --become'
+                sh 'KUBECONFIG=~/.kube/config ansible-playbook -i inventory.ini playbook.yaml --become'
                 }
             }
         }
