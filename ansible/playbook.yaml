@@ -92,6 +92,15 @@
       command: helm status kibana -n {{ namespace }}
       register: kibana_status
       ignore_errors: yes
+    
+    - name: Eliminar ConfigMap conflictivo de Kibana
+      shell: kubectl delete configmap kibana-kibana-helm-scripts -n elk --ignore-not-found
+      environment:
+        KUBECONFIG: "{{ lookup('env','HOME') }}/.kube/config"
+        AWS_ACCESS_KEY_ID: "{{ lookup('env','AWS_ACCESS_KEY_ID') }}"
+        AWS_SECRET_ACCESS_KEY: "{{ lookup('env','AWS_SECRET_ACCESS_KEY') }}"
+        AWS_SESSION_TOKEN: "{{ lookup('env','AWS_SESSION_TOKEN') }}"
+      delegate_to: localhost
 
     - name: Instalar o actualizar Kibana
       shell: >
