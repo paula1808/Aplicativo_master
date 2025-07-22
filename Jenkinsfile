@@ -50,6 +50,18 @@ pipeline {
             }
         }
 
+        stage('Test') {
+            steps {
+                echo 'Running unit tests...'
+                sh 'mvn test'
+            }
+            post {
+                always {
+                    junit '**/target/surefire-reports/*.xml'  // Publica los reportes de pruebas unitarias en Jenkins
+                }
+            }
+        }
+
         stage('Construcción Docker') {
             steps {
                 script {
@@ -92,7 +104,7 @@ pipeline {
         stage('Desplegar ELK con Ansible') {
             steps {
                 dir('ansible') {
-                sh 'ansible-playbook -i inventory.ini playbook.yaml'
+                sh 'ansible-playbook -i inventory.ini playbook.yaml --become'
                 }
             }
         }
@@ -112,6 +124,17 @@ pipeline {
                 }
             
         }
+
+        stage('Prueba de Despliegue') {
+            steps {
+                sh '''
+                kubectl rollout status deployment/sistema-academico
+                sleep 10
+                curl -s --fail http://$(kubectl get svc sistema-service -o jsonpath='{.status.loadBalancer.ingress[0].hostname}') || exit 1
+                '''
+            }
+        }
+        
         stage('Obtener DNS del LoadBalancer') {
             steps {
                 script {
