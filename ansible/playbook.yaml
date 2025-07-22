@@ -96,8 +96,10 @@
     - name: Eliminar ConfigMap conflictivo de Kibana
       shell: |
         helm uninstall kibana -n elk
-        kubectl delete configmap kibana-kibana-helm-scripts -n elk --ignore-not-found
+        kubectl delete role pre-install-kibana-kibana -n elk --ignore-not-found
+        kubectl delete rolebinding pre-install-kibana-kibana -n elk --ignore-not-found
         kubectl delete serviceaccount pre-install-kibana-kibana -n elk --ignore-not-found
+        kubectl delete configmap kibana-kibana-helm-scripts -n elk --ignore-not-found
       environment:
         KUBECONFIG: "{{ lookup('env','HOME') }}/.kube/config"
         AWS_ACCESS_KEY_ID: "{{ lookup('env','AWS_ACCESS_KEY_ID') }}"
