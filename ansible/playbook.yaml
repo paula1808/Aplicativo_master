@@ -95,6 +95,7 @@
     
     - name: Eliminar ConfigMap conflictivo de Kibana
       shell: |
+        helm uninstall kibana -n elk
         kubectl delete configmap kibana-kibana-helm-scripts -n elk --ignore-not-found
         kubectl delete serviceaccount pre-install-kibana-kibana -n elk --ignore-not-found
       environment:
