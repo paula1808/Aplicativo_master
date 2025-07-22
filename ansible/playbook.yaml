@@ -159,6 +159,13 @@
 
     - name: Aplicar RBAC para Filebeat
       shell: kubectl apply -f /tmp/filebeat-rbac.yaml
+      environment:
+        KUBECONFIG: "{{ lookup('env','HOME') }}/.kube/config"
+        AWS_ACCESS_KEY_ID: "{{ lookup('env','AWS_ACCESS_KEY_ID') }}"
+        AWS_SECRET_ACCESS_KEY: "{{ lookup('env','AWS_SECRET_ACCESS_KEY') }}"
+        AWS_SESSION_TOKEN: "{{ lookup('env','AWS_SESSION_TOKEN') }}"
+      delegate_to: localhost
+      
 
     - name: Crear servicio LoadBalancer para Kibana
       copy:
