@@ -73,6 +73,12 @@
         --set resources.requests.memory=512Mi
         --set resources.limits.cpu=500m
         --set resources.limits.memory=1Gi
+      environment:
+        KUBECONFIG: "{{ lookup('env','HOME') }}/.kube/config"
+        AWS_ACCESS_KEY_ID: "{{ lookup('env','AWS_ACCESS_KEY_ID') }}"
+        AWS_SECRET_ACCESS_KEY: "{{ lookup('env','AWS_SECRET_ACCESS_KEY') }}"
+        AWS_SESSION_TOKEN: "{{ lookup('env','AWS_SESSION_TOKEN') }}"
+      delegate_to: localhost
       when: elasticsearch_status.rc != 0
 
     - name: Verificar si Kibana ya está instalado
@@ -90,6 +96,12 @@
         --set elasticsearch.hosts[0]=http://elasticsearch-master.{{ namespace }}.svc.cluster.local:9200
         --set elasticsearch.ssl.enabled=false
         --set elasticsearch.ssl.verificationMode=none
+      environment:
+        KUBECONFIG: "{{ lookup('env','HOME') }}/.kube/config"
+        AWS_ACCESS_KEY_ID: "{{ lookup('env','AWS_ACCESS_KEY_ID') }}"
+        AWS_SECRET_ACCESS_KEY: "{{ lookup('env','AWS_SECRET_ACCESS_KEY') }}"
+        AWS_SESSION_TOKEN: "{{ lookup('env','AWS_SESSION_TOKEN') }}"
+      delegate_to: localhost
       when: kibana_status.rc != 0
 
     - name: Verificar si Filebeat ya está instalado
