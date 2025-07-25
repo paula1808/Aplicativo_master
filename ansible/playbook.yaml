@@ -1,4 +1,4 @@
-- name: Despliegue del stack ELK en Kubernetes con corrección AWS EBS CSI Driver
+- name: Despliegue del stack ELK en Kubernetes, corrección AWS EBS CSI Driver
   hosts: localhost
   vars:
     namespace: elk
