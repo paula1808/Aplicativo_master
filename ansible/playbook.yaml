@@ -4,7 +4,7 @@
     namespace: elk
   tasks:
 
-    - name: Instalar Helm si no está presente
+    - name: Instalar Helm si no está presente.
       become: yes
       shell: |
         curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
