@@ -50,7 +50,7 @@ pipeline {
             }
         }
 
-        stage('Test') {
+        stage('Test-Pruebas unitarias') {
             steps {
                 echo 'Running unit tests...'
                 sh 'mvn test'
