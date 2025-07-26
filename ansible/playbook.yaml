@@ -68,6 +68,12 @@
     - name: Verificar si Elasticsearch ya está instalado
       command: helm status elasticsearch -n {{ namespace }}
       register: elasticsearch_status
+      environment:
+        KUBECONFIG: "{{ lookup('env','HOME') }}/.kube/config"
+        AWS_ACCESS_KEY_ID: "{{ lookup('env','AWS_ACCESS_KEY_ID') }}"
+        AWS_SECRET_ACCESS_KEY: "{{ lookup('env','AWS_SECRET_ACCESS_KEY') }}"
+        AWS_SESSION_TOKEN: "{{ lookup('env','AWS_SESSION_TOKEN') }}"
+      delegate_to: localhost
       ignore_errors: yes
 
     - name: Instalar o actualizar Elasticsearch
@@ -91,6 +97,12 @@
     - name: Verificar si Kibana ya está instalado
       command: helm status kibana -n {{ namespace }}
       register: kibana_status
+      environment:
+        KUBECONFIG: "{{ lookup('env','HOME') }}/.kube/config"
+        AWS_ACCESS_KEY_ID: "{{ lookup('env','AWS_ACCESS_KEY_ID') }}"
+        AWS_SECRET_ACCESS_KEY: "{{ lookup('env','AWS_SECRET_ACCESS_KEY') }}"
+        AWS_SESSION_TOKEN: "{{ lookup('env','AWS_SESSION_TOKEN') }}"
+      delegate_to: localhost
       ignore_errors: yes
     
     - name: Eliminar ConfigMap conflictivo de Kibana
@@ -128,6 +140,12 @@
     - name: Verificar si Filebeat ya está instalado
       command: helm status filebeat -n {{ namespace }}
       register: filebeat_status
+      environment:
+        KUBECONFIG: "{{ lookup('env','HOME') }}/.kube/config"
+        AWS_ACCESS_KEY_ID: "{{ lookup('env','AWS_ACCESS_KEY_ID') }}"
+        AWS_SECRET_ACCESS_KEY: "{{ lookup('env','AWS_SECRET_ACCESS_KEY') }}"
+        AWS_SESSION_TOKEN: "{{ lookup('env','AWS_SESSION_TOKEN') }}"
+      delegate_to: localhost
       ignore_errors: yes
 
     - name: Crear manifiesto de RBAC para Filebeat
@@ -228,7 +246,13 @@
       delegate_to: localhost
 
     - name: Reiniciar DaemonSet Filebeat para aplicar cambios
-      shell: kubectl rollout restart daemonset/filebeat -n {{ namespace }}
+      shell: |
+        ds_name=$(kubectl get daemonset -n elk -o jsonpath="{.items[?(@.metadata.name contains 'filebeat')].metadata.name}")
+        if [ -n "$ds_name" ]; then
+          kubectl rollout restart daemonset/$ds_name -n elk
+        fi
+      args:
+        executable: /bin/bash
       environment:
         KUBECONFIG: "{{ lookup('env','HOME') }}/.kube/config"
         AWS_ACCESS_KEY_ID: "{{ lookup('env','AWS_ACCESS_KEY_ID') }}"
