@@ -145,7 +145,7 @@ pipeline {
 
                 for i in {1..24}; do
                     echo "⏳ Intento $i de 24..."
-                    if curl -fs http://$HOSTNAME/login > /dev/null; then
+                    if curl -f http://$HOSTNAME/login > /dev/null; then
                         echo "✅ Aplicación disponible en http://$HOSTNAME/login"
                         exit 0
                     fi
@@ -163,6 +163,12 @@ pipeline {
                 script {
                     def externalIp = sh(script: "kubectl get svc sistema-service -o jsonpath='{.status.loadBalancer.ingress[0].hostname}'", returnStdout: true).trim()
                     echo "📡 DNS del LoadBalancer: http://${externalIp}"
+
+                }
+                script {
+                    def external = sh(script: "kubectl get svc -n elk -o jsonpath='{.status.loadBalancer.ingress[0].hostname}'", returnStdout: true).trim()
+                    echo "📡 DNS del LoadBalancer: http://${external}"
+
                 }
             }
         } 
