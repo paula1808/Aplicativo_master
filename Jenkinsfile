@@ -109,7 +109,7 @@ pipeline {
             }
         }
 
-        stage('Despliegue Kubernetes') {
+        stage('Despliegue de Kubernetes') {
             steps {
                // withCredentials([file(credentialsId: KUBECONFIG_CREDENTIAL_ID, variable: 'KUBECONFIG')]) {
                     sh '''
