@@ -220,9 +220,27 @@
 
     - name: Instalar o actualizar Filebeat con Helm usando values.yaml
       shell: helm upgrade --install filebeat elastic/filebeat -n {{ namespace }} -f /tmp/filebeat-values.yaml
+      environment:
+        KUBECONFIG: "{{ lookup('env','HOME') }}/.kube/config"
+        AWS_ACCESS_KEY_ID: "{{ lookup('env','AWS_ACCESS_KEY_ID') }}"
+        AWS_SECRET_ACCESS_KEY: "{{ lookup('env','AWS_SECRET_ACCESS_KEY') }}"
+        AWS_SESSION_TOKEN: "{{ lookup('env','AWS_SESSION_TOKEN') }}"
+      delegate_to: localhost
 
     - name: Reiniciar DaemonSet Filebeat para aplicar cambios
       shell: kubectl rollout restart daemonset/filebeat -n {{ namespace }}
+      environment:
+        KUBECONFIG: "{{ lookup('env','HOME') }}/.kube/config"
+        AWS_ACCESS_KEY_ID: "{{ lookup('env','AWS_ACCESS_KEY_ID') }}"
+        AWS_SECRET_ACCESS_KEY: "{{ lookup('env','AWS_SECRET_ACCESS_KEY') }}"
+        AWS_SESSION_TOKEN: "{{ lookup('env','AWS_SESSION_TOKEN') }}"
+      delegate_to: localhost
 
     - name: Aplicar servicio LoadBalancer para Kibana
       shell: kubectl apply -f /tmp/kibana-service.yaml
+      environment:
+        KUBECONFIG: "{{ lookup('env','HOME') }}/.kube/config"
+        AWS_ACCESS_KEY_ID: "{{ lookup('env','AWS_ACCESS_KEY_ID') }}"
+        AWS_SECRET_ACCESS_KEY: "{{ lookup('env','AWS_SECRET_ACCESS_KEY') }}"
+        AWS_SESSION_TOKEN: "{{ lookup('env','AWS_SESSION_TOKEN') }}"
+      delegate_to: localhost
