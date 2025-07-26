@@ -133,7 +133,7 @@ pipeline {
                 
                 for i in {1..24}; do
                     echo "Intentando acceder a http://$HOSTNAME (intento $i)..."
-                    if curl -s -L --fail http://$HOSTNAME/login; then
+                    if curl -f http://$HOSTNAME/login; then
                         echo "Aplicación disponible ✅"
                         exit 0
                     fi
