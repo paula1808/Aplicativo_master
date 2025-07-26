@@ -128,19 +128,31 @@ pipeline {
         stage('Prueba de Despliegue') {
             steps {
                 sh '''
+                set -e
+
+                echo "📦 Esperando que el despliegue esté completo..."
                 kubectl rollout status deployment/sistema-academico
+
+                echo "🌐 Obteniendo hostname del LoadBalancer..."
                 HOSTNAME=$(kubectl get svc sistema-service -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
-                
+
+                if [ -z "$HOSTNAME" ]; then
+                    echo "❌ No se pudo obtener el hostname del servicio. Verifica que el LoadBalancer esté activo."
+                    exit 1
+                fi
+
+                echo "🔍 Intentando acceder a http://$HOSTNAME/login..."
+
                 for i in {1..24}; do
-                    echo "Intentando acceder a http://$HOSTNAME (intento $i)..."
-                    if curl -f http://$HOSTNAME/login; then
-                        echo "Aplicación disponible ✅"
+                    echo "⏳ Intento $i de 24..."
+                    if curl -fs http://$HOSTNAME/login > /dev/null; then
+                        echo "✅ Aplicación disponible en http://$HOSTNAME/login"
                         exit 0
                     fi
                     sleep 5
                 done
 
-                echo "La aplicación no respondió tras 2 minutos ❌"
+                echo "❌ La aplicación no respondió tras 2 minutos"
                 exit 1
                 '''
             }
