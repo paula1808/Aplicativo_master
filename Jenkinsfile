@@ -129,8 +129,19 @@ pipeline {
             steps {
                 sh '''
                 kubectl rollout status deployment/sistema-academico
-                sleep 10
-                curl -s --fail http://$(kubectl get svc sistema-service -o jsonpath='{.status.loadBalancer.ingress[0].hostname}') || exit 1
+                HOSTNAME=$(kubectl get svc sistema-service -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
+                
+                for i in {1..24}; do
+                    echo "Intentando acceder a http://$HOSTNAME (intento $i)..."
+                    if curl -s --fail http://$HOSTNAME; then
+                        echo "Aplicación disponible ✅"
+                        exit 0
+                    fi
+                    sleep 5
+                done
+
+                echo "La aplicación no respondió tras 2 minutos ❌"
+                exit 1
                 '''
             }
         }
