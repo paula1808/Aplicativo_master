@@ -127,47 +127,66 @@ pipeline {
 
         stage('Prueba de Despliegue') {
             steps {
-                sh '''
-                set -e
+                script {
+                    echo "📦 Esperando que el despliegue esté completo..."
+                    sh "kubectl rollout status deployment/sistema-academico"
 
-                echo "📦 Esperando que el despliegue esté completo..."
-                kubectl rollout status deployment/sistema-academico
+                    echo "🌐 Esperando que el LoadBalancer obtenga un hostname/IP..."
+                    def hostname = ''
+                    for (int i = 0; i < 12; i++) {
+                        hostname = sh(
+                            script: "kubectl get svc sistema-service -o jsonpath='{.status.loadBalancer.ingress[0].hostname}' || true",
+                            returnStdout: true
+                        ).trim()
+                        if (hostname) {
+                            break
+                        }
+                        echo "⏳ Esperando hostname... intento ${i+1}/12"
+                        sleep 10
+                    }
 
-                echo "🌐 Obteniendo hostname del LoadBalancer..."
-                HOSTNAME=$(kubectl get svc sistema-service -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
+                    if (!hostname) {
+                        error("❌ No se pudo obtener el hostname del servicio.")
+                    }
 
-                if [ -z "$HOSTNAME" ]; then
-                    echo "❌ No se pudo obtener el hostname del servicio. Verifica que el LoadBalancer esté activo."
-                    exit 1
-                fi
+                    echo "🌐 Hostname obtenido: http://${hostname}/login"
 
-                echo "🔍 Intentando acceder a http://$HOSTNAME/login..."
+                    def success = false
+                    for (int i = 0; i < 24; i++) {
+                        echo "⏳ Intento ${i+1}/24 de verificar la aplicación..."
+                        def status = sh(
+                            script: "curl -s -o /dev/null -w '%{http_code}' http://${hostname}/login || true",
+                            returnStdout: true
+                        ).trim()
 
-                for i in {1..24}; do
-                    echo "⏳ Intento $i de 24..."
-                    if curl -f http://$HOSTNAME/login > /dev/null; then
-                        echo "✅ Aplicación disponible en http://$HOSTNAME/login"
-                        exit 0
-                    fi
-                    sleep 5
-                done
+                        if (status == '200') {
+                            echo "✅ Aplicación disponible en http://${hostname}/login"
+                            success = true
+                            break
+                        } else {
+                            echo "⚠️ Estado HTTP recibido: ${status}"
+                        }
+                        sleep 5
+                    }
 
-                echo "❌ La aplicación no respondió tras 2 minutos"
-                exit 1
-                '''
+                    if (!success) {
+                        error("❌ La aplicación no respondió exitosamente tras 2 minutos.")
+                    }
+                }
             }
         }
+
         
         stage('Obtener DNS del LoadBalancer') {
             steps {
                 script {
                     def externalIp = sh(script: "kubectl get svc sistema-service -o jsonpath='{.status.loadBalancer.ingress[0].hostname}'", returnStdout: true).trim()
-                    echo "📡 DNS del LoadBalancer: http://${externalIp}"
+                    echo "📡 DNS del LoadBalancer Aplicativo: http://${externalIp}"
 
                 }
                 script {
                     def external = sh(script: "kubectl get svc -n elk -o jsonpath='{.status.loadBalancer.ingress[0].hostname}'", returnStdout: true).trim()
-                    echo "📡 DNS del LoadBalancer: http://${external}"
+                    echo "📡 DNS del LoadBalancer ELK: http://${external}"
 
                 }
             }
