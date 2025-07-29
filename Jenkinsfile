@@ -189,8 +189,29 @@ pipeline {
                     echo "📡 DNS del LoadBalancer ELK: http://${external}"
 
                 }
+                
             }
         } 
+
+        stage('Obtener credenciales de Kibana') {
+            steps {
+                script {
+                def user = sh(
+                    script: "kubectl get secret elasticsearch-master-credentials -n elk -o jsonpath='{.data.username}' | base64 --decode",
+                    returnStdout: true
+                ).trim()
+
+                def pass = sh(
+                    script: "kubectl get secret elasticsearch-master-credentials -n elk -o jsonpath='{.data.password}' | base64 --decode",
+                    returnStdout: true
+                ).trim()
+
+                echo "Kibana está disponible en: http://$(kubectl get svc kibana-lb -n elk -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')"
+                echo "Usuario: ${user}"
+                echo "Contraseña: ${pass}"
+                }
+            }
+        }
         
         
     }
