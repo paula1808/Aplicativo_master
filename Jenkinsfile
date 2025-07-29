@@ -185,7 +185,7 @@ pipeline {
 
                 }
                 script {
-                    def external = sh(script: "kubectl get svc -n elk -o jsonpath='{.status.loadBalancer.ingress[0].hostname}'", returnStdout: true).trim()
+                    def external = sh(script: "kubectl get svc kibana-lb -n elk -o jsonpath='{.status.loadBalancer.ingress[0].hostname}'", returnStdout: true).trim()
                     echo "📡 DNS del LoadBalancer ELK: http://${external}"
 
                 }
