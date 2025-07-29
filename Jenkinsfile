@@ -206,7 +206,6 @@ pipeline {
                     returnStdout: true
                 ).trim()
 
-                echo "Kibana está disponible en: http://$(kubectl get svc kibana-lb -n elk -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')"
                 echo "Usuario: ${user}"
                 echo "Contraseña: ${pass}"
                 }
